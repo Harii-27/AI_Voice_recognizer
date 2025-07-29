@@ -58,8 +58,6 @@ class SimpleVoiceIdentifier:
             
             try:
                 transcription = self.recognizer.recognize_google(audio)
-                print("🎯 Used dynamic language recognition")
-                print(f"📝 Transcription: {transcription}")
             except sr.UnknownValueError:
                 print(" Speech recognition failed: Could not understand audio")
                 return {"error": "Could not understand audio. Please speak clearly."}
@@ -73,10 +71,13 @@ class SimpleVoiceIdentifier:
             # Simple AI language detection
             system_prompt = """You are a language identification expert. Your role is to identify the language of any given text.
 
+IMPORTANT: If the text is in transliterated form (using English letters), convert it to the proper script of that language.
+
 Return a JSON response with:
 {
     "detected_language": "language_code",
-    "language_name": "Language Name"
+    "language_name": "Language Name",
+    "pure_text": "Text converted to proper script if needed"
 }
 
 Text: "{transcription}" """
@@ -90,7 +91,6 @@ Text: "{transcription}" """
             
             # Parse AI response
             content = response.content
-            print(f"🤖 AI Analysis: {content}")
             
           
             
@@ -101,8 +101,13 @@ Text: "{transcription}" """
                     result_data = json.loads(json_match.group())
                     detected_language = result_data.get("detected_language", "unknown")
                     language_name = result_data.get("language_name", "Unknown")
+                    pure_text = result_data.get("pure_text", transcription)
                     
                     print(f"🎯 AI Detected: {language_name} ({detected_language})")
+                    
+                    # Use pure text if provided by AI
+                    if pure_text and pure_text != transcription:
+                        transcription = pure_text
                 else:
                     detected_language = "unknown"
                     language_name = "Unknown"
