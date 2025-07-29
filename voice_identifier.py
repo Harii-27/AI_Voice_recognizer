@@ -61,13 +61,13 @@ class SimpleVoiceIdentifier:
                 print("🎯 Used dynamic language recognition")
                 print(f"📝 Transcription: {transcription}")
             except sr.UnknownValueError:
-                print("❌ Speech recognition failed: Could not understand audio")
+                print(" Speech recognition failed: Could not understand audio")
                 return {"error": "Could not understand audio. Please speak clearly."}
             except sr.RequestError as e:
-                print(f"❌ Speech recognition failed: Google service error - {e}")
+                print(f" Speech recognition failed: Google service error - {e}")
                 return {"error": "Speech recognition service error. Please try again."}
             except Exception as e:
-                print(f"❌ Speech recognition failed: {e}")
+                print(f" Speech recognition failed: {e}")
                 return {"error": f"Speech recognition failed: {e}"}
             
             # Simple AI language detection
@@ -148,7 +148,6 @@ Text: "{transcription}" """
             
             # Clean up
             os.unlink(temp_file_path)
-            print("🗑️ Cleaned up temporary file")
             
             return result
             
@@ -156,7 +155,7 @@ Text: "{transcription}" """
             print("⏰ Timeout: No speech detected")
             return {"error": "No speech detected. Please speak when recording."}
         except Exception as e:
-            print(f"❌ Recording error: {e}")
+            print(f" Recording error: {e}")
             return {"error": f"Recording failed: {str(e)}"}
 
 # Flask app
@@ -202,5 +201,5 @@ if __name__ == '__main__':
     loop.run_until_complete(initialize())
     loop.close()
     
-    print("✅ Ready! Open http://localhost:5000")
-    app.run(debug=True, host='0.0.0.0', port=5000) 
+    print("✅ Ready! Open http://192.168.1.6:5000")
+    app.run(debug=True, host='192.168.1.6', port=5000) 

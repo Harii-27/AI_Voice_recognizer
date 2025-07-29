@@ -1,27 +1,250 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Voice Language Identifier</title>
     <style>
-        body { font-family: Arial; text-align: center; padding: 50px; background: #f0f0f0; }
-        .container { background: white; padding: 30px; border-radius: 10px; max-width: 400px; margin: 0 auto; }
-        button { background: #007bff; color: white; border: none; padding: 15px 30px; border-radius: 5px; cursor: pointer; margin: 10px; }
-        .result { margin-top: 20px; padding: 15px; border-radius: 5px; }
-        .success { background: #d4edda; color: #155724; }
-        .error { background: #f8d7da; color: #721c24; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .header {
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .header p {
+            color: #7f8c8d;
+            font-size: 1.1rem;
+            font-weight: 300;
+        }
+
+        .record-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 18px 40px;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+            margin: 20px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .record-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
+        }
+
+        .record-button:active {
+            transform: translateY(0);
+        }
+
+        .record-button.recording {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .status {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: 500;
+            display: none;
+        }
+
+        .status.recording {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+            display: block;
+        }
+
+        .result {
+            margin-top: 30px;
+            padding: 25px;
+            border-radius: 15px;
+            font-weight: 500;
+            display: none;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result.success {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            box-shadow: 0 5px 15px rgba(212, 237, 218, 0.3);
+        }
+
+        .result.error {
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            box-shadow: 0 5px 15px rgba(248, 215, 218, 0.3);
+        }
+
+        .result-item {
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .result-label {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-right: 10px;
+        }
+
+        .result-value {
+            color: #34495e;
+        }
+
+        .transcription {
+            font-style: italic;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border: 1px solid #e9ecef;
+        }
+
+        .language-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .footer {
+            margin-top: 30px;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            font-weight: 300;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 30px 20px;
+                margin: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .record-button {
+                padding: 15px 30px;
+                font-size: 1.1rem;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>🎤 Voice Language Identifier</h2>
-        <button onclick="recordAudio()">Record Audio</button>
-        <div id="result"></div>
+        <div class="header">
+            <h1>🎤 Voice Language Identifier</h1>
+            <p>Speak in any language and let AI identify it for you</p>
+        </div>
+
+        <button class="record-button" onclick="recordAudio()" id="recordBtn">
+            🎤 Start Recording
+        </button>
+
+        <div class="status" id="status"></div>
+
+        <div class="result" id="result"></div>
+
+        <div class="footer">
+            Powered by Google Speech Recognition & OpenAI AI
+        </div>
     </div>
-    
+
     <script>
         function recordAudio() {
-            document.getElementById('result').innerHTML = 'Recording...';
+            const recordBtn = document.getElementById('recordBtn');
+            const status = document.getElementById('status');
+            const result = document.getElementById('result');
+
+            // Update UI for recording
+            recordBtn.innerHTML = '<span class="loading"></span>Recording...';
+            recordBtn.classList.add('recording');
+            recordBtn.disabled = true;
             
+            status.innerHTML = '🎙️ Listening to your voice...';
+            status.className = 'status recording';
+            status.style.display = 'block';
+            
+            result.style.display = 'none';
+
             fetch('/record', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
@@ -29,19 +252,50 @@
             })
             .then(response => response.json())
             .then(data => {
+                // Reset button
+                recordBtn.innerHTML = '🎤 Start Recording';
+                recordBtn.classList.remove('recording');
+                recordBtn.disabled = false;
+                status.style.display = 'none';
+
                 if (data.error) {
-                    document.getElementById('result').innerHTML = '<div class="result error">Error: ' + data.error + '</div>';
+                    result.innerHTML = `
+                        <div class="result-item">
+                            <span class="result-label">❌ Error:</span>
+                            <span class="result-value">${data.error}</span>
+                        </div>
+                    `;
+                    result.className = 'result error';
                 } else {
-                    let resultHtml = '<div class="result success">' +
-                        '<strong>Language:</strong> ' + data.language_name + '<br>' +
-                        '<strong>Transcription:</strong> "' + data.transcription + '"';
-                    
-                    resultHtml += '</div>';
-                    document.getElementById('result').innerHTML = resultHtml;
+                    result.innerHTML = `
+                        <div class="result-item">
+                            <span class="result-label">🌍 Language:</span>
+                            <span class="language-badge">${data.language_name}</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">📝 Transcription:</span>
+                            <div class="transcription">"${data.transcription}"</div>
+                        </div>
+                    `;
+                    result.className = 'result success';
                 }
+                result.style.display = 'block';
             })
             .catch(error => {
-                document.getElementById('result').innerHTML = '<div class="result error">Error: ' + error.message + '</div>';
+                // Reset button
+                recordBtn.innerHTML = '🎤 Start Recording';
+                recordBtn.classList.remove('recording');
+                recordBtn.disabled = false;
+                status.style.display = 'none';
+
+                result.innerHTML = `
+                    <div class="result-item">
+                        <span class="result-label">❌ Error:</span>
+                        <span class="result-value">${error.message}</span>
+                    </div>
+                `;
+                result.className = 'result error';
+                result.style.display = 'block';
             });
         }
     </script>
